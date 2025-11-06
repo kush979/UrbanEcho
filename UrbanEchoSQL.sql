@@ -1,0 +1,18 @@
+CREATE DATABASE urbanecho;
+show databases;
+use urbanecho;
+CREATE TABLE users (
+    id INT AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    location VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id)
+);
+ALTER TABLE users ADD COLUMN mobile NUMERIC NOT NULL;
+ALTER TABLE users DROP COLUMN mobile;
+ALTER TABLE users ADD COLUMN mobile NUMERIC NOT NULL;
+SELECT * FROM users;
+SELECT * FROM users;
+ALTER TABLE users ADD COLUMN password VARCHAR(255) NOT NULL;
+SELECT * FROM users;
+ALTER TABLE users MODIFY COLUMN password VARCHAR(255) NOT NULL AFTER email;

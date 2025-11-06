@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UrbanEcho | User Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        accent: '#fbbf24',
+                        bg: '#f0f9ff',
+                        card: '#ffffff',
+                        border: '#e0e7ef'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-bg min-h-screen">
+    <!-- Background Blur Shapes -->
+    <div class="absolute inset-0 z-0 pointer-events-none">
+        <div class="absolute top-0 left-0 w-72 h-72 bg-primary opacity-10 rounded-full blur-2xl"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-accent opacity-20 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Navbar -->
+    <script src="../components/navbar.js"></script>
+
+    <!-- Dashboard Container -->
+    <div class="relative z-10 pt-28 px-6 max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold text-primary">Welcome, Citizen</h1>
+            <p class="text-gray-600">Manage your feedback and track city service responses.</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10" id="fileComplaintBtn">
+            <button class="bg-card p-6 shadow-xl rounded-2xl border border-border hover:shadow-2xl transition flex flex-col gap-2">
+                <div class="bg-primary w-12 h-12 flex items-center justify-center rounded-full text-white shadow">
+                    +
+                </div>
+                <h2 class="text-lg font-bold text-primary">File Complaint</h2>
+                <p class="text-gray-500 text-sm">Submit new complaint for civic issues.</p>
+            </button>
+
+            <a href="my-complaints.html" class="bg-card p-6 shadow-xl rounded-2xl border border-border hover:shadow-2xl transition flex flex-col gap-2">
+                <div class="bg-accent w-12 h-12 flex items-center justify-center rounded-full text-white shadow">
+                    📑
+                </div>
+                <h2 class="text-lg font-bold text-primary">My Complaints</h2>
+                <p class="text-gray-500 text-sm">View and manage your submissions.</p>
+            </a>
+
+            <a href="status.html" class="bg-card p-6 shadow-xl rounded-2xl border border-border hover:shadow-2xl transition flex flex-col gap-2">
+                <div class="bg-primary w-12 h-12 flex items-center justify-center rounded-full text-white shadow">
+                    🔎
+                </div>
+                <h2 class="text-lg font-bold text-primary">Track Status</h2>
+                <p class="text-gray-500 text-sm">Monitor progress of complaints.</p>
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+            <div class="bg-card p-6 rounded-xl shadow-xl border border-border text-center">
+                <h3 class="text-gray-600 text-sm">Total Filed</h3>
+                <p class="text-3xl font-extrabold text-primary">12</p>
+            </div>
+            <div class="bg-card p-6 rounded-xl shadow-xl border border-border text-center">
+                <h3 class="text-gray-600 text-sm">Resolved</h3>
+                <p class="text-3xl font-extrabold text-green-600">7</p>
+            </div>
+            <div class="bg-card p-6 rounded-xl shadow-xl border border-border text-center">
+                <h3 class="text-gray-600 text-sm">Pending</h3>
+                <p class="text-3xl font-extrabold text-yellow-500">5</p>
+            </div>
+        </div>
+
+        <!-- Recent Complaints Table -->
+        <div class="bg-card p-6 rounded-xl shadow-xl border border-border">
+            <h2 class="text-xl font-bold text-primary mb-4">Recent Complaints</h2>
+            <table class="w-full text-sm text-left">
+                <thead class="bg-gray-100 text-gray-700">
+                    <tr>
+                        <th class="p-3">ID</th>
+                        <th class="p-3">Category</th>
+                        <th class="p-3">Date</th>
+                        <th class="p-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b">
+                        <td class="p-3">CMP1023</td>
+                        <td class="p-3">Garbage</td>
+                        <td class="p-3">2025-11-01</td>
+                        <td class="p-3 text-yellow-500 font-bold">Pending</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="p-3">CMP1019</td>
+                        <td class="p-3">Streetlight</td>
+                        <td class="p-3">2025-10-29</td>
+                        <td class="p-3 text-green-600 font-bold">Resolved</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Complaint Modal -->
+<div id="complaintModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white w-96 p-6 rounded-lg shadow-lg">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">File Complaint</h2>
+            <button id="closeModal" class="text-gray-600 hover:text-red-500 font-bold text-lg">✕</button>
+        </div>
+
+        <form>
+            <label class="block mb-2 font-medium">Complaint Title</label>
+            <input type="text" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter complaint title">
+
+            <label class="block mb-2 font-medium">Description</label>
+            <textarea class="w-full border px-3 py-2 rounded mb-3" rows="3" placeholder="Describe the issue"></textarea>
+
+            <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+                Submit
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Open popup
+    const fileComplaintBtn = document.getElementById("fileComplaintBtn");
+    const complaintModal = document.getElementById("complaintModal");
+    const closeModal = document.getElementById("closeModal");
+
+    fileComplaintBtn.addEventListener("click", () => {
+        complaintModal.classList.remove("hidden");
+    });
+
+    // Close popup
+    closeModal.addEventListener("click", () => {
+        complaintModal.classList.add("hidden");
+    });
+
+    // Optional: close when clicking outside modal
+    window.addEventListener("click", (e) => {
+        if (e.target === complaintModal) {
+            complaintModal.classList.add("hidden");
+        }
+    });
+</script>
+</body>
+</html>
