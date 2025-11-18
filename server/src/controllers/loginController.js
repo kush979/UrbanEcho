@@ -6,6 +6,7 @@ dotenv.config();
 
 export const LoginUser = async (req, res) => {
   try {
+    console.log("hello");
     const { email, password } = req.body;
     const [rows] = await db.execute(
       'SELECT * FROM users WHERE email = ?',
@@ -18,12 +19,14 @@ export const LoginUser = async (req, res) => {
     const user = rows[0];
 
     if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
-    res.status(201).json({ message: "Admin" });
+      res.status(201).json({ message: "Admin" });
     } else if(user.password === password){
-      res.status(201).json({ message: "Success" });
+      res.status(201).json({ message: "Success", id: user.id });
+      console.log(user.id);
     } else{
       res.status(401).json({ message: "Failure" });
     }
+
   } catch (error) {
     console.error('LOGIN ERROR:', error);
     res.status(400).json({ message: error.message });

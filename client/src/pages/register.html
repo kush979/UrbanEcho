@@ -92,6 +92,8 @@
 
             if (response.ok) {
                 alert('Registration submitted!');
+                const result = await response.json();
+                sessionStorage.setItem("user_Id", result.id);
                 document.getElementById('registrationForm').reset();
                 window.location.href = './user-dashboard.html';
             } else {

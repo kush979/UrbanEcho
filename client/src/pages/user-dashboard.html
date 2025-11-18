@@ -5,7 +5,6 @@
     <title>UrbanEcho | User Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -25,146 +24,318 @@
 </head>
 
 <body class="bg-bg min-h-screen">
-    <!-- Background Blur Shapes -->
     <div class="absolute inset-0 z-0 pointer-events-none">
         <div class="absolute top-0 left-0 w-72 h-72 bg-primary opacity-10 rounded-full blur-2xl"></div>
         <div class="absolute bottom-0 right-0 w-96 h-96 bg-accent opacity-20 rounded-full blur-3xl"></div>
     </div>
 
-    <!-- Navbar -->
     <script src="../components/navbar.js"></script>
 
-    <!-- Dashboard Container -->
     <div class="relative z-10 pt-28 px-6 max-w-6xl mx-auto">
-        <!-- Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-extrabold text-primary">Welcome, Citizen</h1>
             <p class="text-gray-600">Manage your feedback and track city service responses.</p>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10" id="fileComplaintBtn">
-            <button class="bg-card p-6 shadow-xl rounded-2xl border border-border hover:shadow-2xl transition flex flex-col gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+            <button class="bg-card p-6 shadow-xl rounded-2xl border border-border hover:shadow-2xl transition flex flex-col gap-2" id="fileComplaintBtn">
                 <div class="bg-primary w-12 h-12 flex items-center justify-center rounded-full text-white shadow">
                     +
                 </div>
                 <h2 class="text-lg font-bold text-primary">File Complaint</h2>
                 <p class="text-gray-500 text-sm">Submit new complaint for civic issues.</p>
             </button>
-
-            <a href="my-complaints.html" class="bg-card p-6 shadow-xl rounded-2xl border border-border hover:shadow-2xl transition flex flex-col gap-2">
-                <div class="bg-accent w-12 h-12 flex items-center justify-center rounded-full text-white shadow">
+            
+            <button class="bg-card p-6 shadow-xl rounded-2xl border border-border hover:shadow-2xl transition flex flex-col gap-2" id="myComplaintsBtn">
+                <div class="bg-primary w-12 h-12 flex items-center justify-center rounded-full text-white shadow">
                     📑
                 </div>
                 <h2 class="text-lg font-bold text-primary">My Complaints</h2>
                 <p class="text-gray-500 text-sm">View and manage your submissions.</p>
-            </a>
-
-            <a href="status.html" class="bg-card p-6 shadow-xl rounded-2xl border border-border hover:shadow-2xl transition flex flex-col gap-2">
+            </button>
+            
+            <button class="bg-card p-6 shadow-xl rounded-2xl border border-border hover:shadow-2xl transition flex flex-col gap-2" id="trackStatusBtn">
                 <div class="bg-primary w-12 h-12 flex items-center justify-center rounded-full text-white shadow">
                     🔎
                 </div>
                 <h2 class="text-lg font-bold text-primary">Track Status</h2>
                 <p class="text-gray-500 text-sm">Monitor progress of complaints.</p>
-            </a>
+            </button>
         </div>
 
-        <!-- Stats -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
             <div class="bg-card p-6 rounded-xl shadow-xl border border-border text-center">
                 <h3 class="text-gray-600 text-sm">Total Filed</h3>
-                <p class="text-3xl font-extrabold text-primary">12</p>
+                <p class="text-3xl font-extrabold text-primary" id="totalComplaints">0</p>
             </div>
             <div class="bg-card p-6 rounded-xl shadow-xl border border-border text-center">
                 <h3 class="text-gray-600 text-sm">Resolved</h3>
-                <p class="text-3xl font-extrabold text-green-600">7</p>
+                <p class="text-3xl font-extrabold text-green-600" id="totalResolved">0</p>
             </div>
             <div class="bg-card p-6 rounded-xl shadow-xl border border-border text-center">
                 <h3 class="text-gray-600 text-sm">Pending</h3>
-                <p class="text-3xl font-extrabold text-yellow-500">5</p>
+                <p class="text-3xl font-extrabold text-yellow-500" id="totalPending">0</p>
             </div>
         </div>
 
-        <!-- Recent Complaints Table -->
         <div class="bg-card p-6 rounded-xl shadow-xl border border-border">
             <h2 class="text-xl font-bold text-primary mb-4">Recent Complaints</h2>
             <table class="w-full text-sm text-left">
                 <thead class="bg-gray-100 text-gray-700">
                     <tr>
                         <th class="p-3">ID</th>
-                        <th class="p-3">Category</th>
+                        <th class="p-3">Title</th>
                         <th class="p-3">Date</th>
                         <th class="p-3">Status</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr class="border-b">
-                        <td class="p-3">CMP1023</td>
-                        <td class="p-3">Garbage</td>
-                        <td class="p-3">2025-11-01</td>
-                        <td class="p-3 text-yellow-500 font-bold">Pending</td>
-                    </tr>
-                    <tr class="border-b">
-                        <td class="p-3">CMP1019</td>
-                        <td class="p-3">Streetlight</td>
-                        <td class="p-3">2025-10-29</td>
-                        <td class="p-3 text-green-600 font-bold">Resolved</td>
-                    </tr>
-                </tbody>
+                <tbody id="recentComplaintsBody">
+                    </tbody>
             </table>
         </div>
     </div>
     
-    <!-- Complaint Modal -->
-<div id="complaintModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white w-96 p-6 rounded-lg shadow-lg">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">File Complaint</h2>
-            <button id="closeModal" class="text-gray-600 hover:text-red-500 font-bold text-lg">✕</button>
+    <div id="complaintBox" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white w-3/4 p-6 rounded-lg shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">File Complaint</h2>
+                <button id="closeModal" class="text-gray-600 hover:text-red-500 font-bold text-lg">✕</button>
+            </div>
+
+            <form id="complaintSubmit">
+                <div class="grid grid-cols-4 gap-10">
+                    <div class="col-span-2">
+                        <label class="block mb-2 font-medium">Complaint Title</label>
+                        <input type="text" id="complaintTitle" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter complaint title">
+                    </div>
+                    <div class="col-span-2">  
+                        <label class="block mb-2 font-medium">State</label>
+                        <input type="text" id="state" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter state">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block mb-2 font-medium">City</label>
+                        <input type="text" id="city" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter city">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block mb-2 font-medium">Department</label>
+                        <input type="text" id="department" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter complaint department">
+                    </div>
+                    <div class="col-span-2">    
+                        <label class="block mb-2 font-medium">Description</label>
+                        <textarea id="description" class="w-full border px-3 py-2 rounded mb-3" rows="3" placeholder="Describe the issue"></textarea>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block mb-2 font-medium">Location</label>
+                        <textarea id="issueLocation" class="w-full border px-3 py-2 rounded mb-3" rows="3" placeholder="Issue location"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+                    Submit
+                </button>
+            </form>
         </div>
-
-        <form>
-            <label class="block mb-2 font-medium">Complaint Title</label>
-            <input type="text" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter complaint title">
-            
-            <label class="block mb-2 font-medium">State</label>
-            <input type="text" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter state">
-            
-            <label class="block mb-2 font-medium">City</label>
-            <input type="text" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter city">
-            
-            <label class="block mb-2 font-medium">Department</label>
-            <input type="text" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter complaint department">
-
-            <label class="block mb-2 font-medium">Description</label>
-            <textarea class="w-full border px-3 py-2 rounded mb-3" rows="3" placeholder="Describe the issue"></textarea>
-
-            <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
-                Submit
-            </button>
-        </form>
     </div>
-</div>
+
+    <div id="allComplaintBox" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white w-3/4 max-h-[80vh] p-6 rounded-lg shadow-lg flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">My Complaints</h2>
+                <button id="closeAllComplaintsModal" class="text-gray-600 hover:text-red-500 font-bold text-lg">✕</button>
+            </div>
+
+            <div class="overflow-y-auto flex-grow">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-gray-100 text-gray-700 sticky top-0">
+                        <tr>
+                            <th class="p-3">ID</th>
+                            <th class="p-3">Title</th>
+                            <th class="p-3">Date</th>
+                            <th class="p-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allComplaintsBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
 <script>
-    // Open popup
-    const fileComplaintBtn = document.getElementById("fileComplaintBtn");
-    const complaintModal = document.getElementById("complaintModal");
-    const closeModal = document.getElementById("closeModal");
+    const userId = parseInt(sessionStorage.getItem("user_Id"), 10) || 1; 
 
-    fileComplaintBtn.addEventListener("click", () => {
-        complaintModal.classList.remove("hidden");
-    });
+    // --- Render Function ---
+    const renderTable = (data) => {
+        const tableBody = document.getElementById("allComplaintsBody");
+        tableBody.innerHTML = ""; 
 
-    // Close popup
-    closeModal.addEventListener("click", () => {
-        complaintModal.classList.add("hidden");
-    });
+        if (data.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">No complaints found.</td></tr>`;
+            return;
+        }
 
-    // Optional: close when clicking outside modal
-    window.addEventListener("click", (e) => {
-        if (e.target === complaintModal) {
-            complaintModal.classList.add("hidden");
+        data.forEach(item => {
+            const statusMap = {
+                'Pending': 'text-yellow-500',
+                'In Progress': 'text-blue-500',
+                'Resolved': 'text-green-600',
+                'Rejected': 'text-red-500'
+            };
+            const statusColor = statusMap[item.status] || 'text-gray-500';
+            const dateStr = new Date(item.created_at).toLocaleDateString("en-CA");
+
+            const row = `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3 font-mono text-xs text-gray-500">${'comp#' + item.complaint_id}</td>
+                    <td class="p-3 font-medium">${item.title}</td>
+                    <td class="p-3 text-gray-600">${dateStr}</td>
+                    <td class="p-3 ${statusColor} font-bold">${item.status}</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    };
+
+    // --- Render Recent Complaints ---
+    const renderRecentTable = (data) => {
+        const tableBody = document.getElementById("recentComplaintsBody");
+        tableBody.innerHTML = ""; 
+
+        const recentData = data.slice(-3).reverse();
+
+        if (recentData.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">No recent complaints.</td></tr>`;
+            return;
+        }
+
+        recentData.forEach(item => {
+            const statusColor = item.status === 'Resolved' ? 'text-green-600' : 'text-yellow-500';
+            const dateStr = new Date(item.created_at).toLocaleDateString("en-CA");
+
+            const row = `
+                <tr class="border-b">
+                    <td class="p-3 font-mono text-gray-500">${'comp#' + item.complaint_id}</td>
+                    <td class="p-3 font-medium">${item.title}</td>
+                    <td class="p-3 text-gray-600">${dateStr}</td>
+                    <td class="p-3 ${statusColor} font-bold">${item.status}</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    };
+
+    // --- Fetch Initial Data ---
+    let count = 0;
+    let resolved = 0;
+    let pending = 0;
+
+    window.onload = async function() {
+        try {
+            const countRes = await fetch(`http://localhost:5000/api/complaint-count/${userId}`);
+            if (countRes.ok) {
+                const result = await countRes.json();
+                count = result.count;
+                resolved = result.resolved;
+                pending = result.pending;
+
+                document.getElementById("totalComplaints").innerText = count;
+                document.getElementById("totalResolved").innerText = resolved;
+                document.getElementById("totalPending").innerText = pending;
+            }
+
+            const listRes = await fetch(`http://localhost:5000/api/all-complaints/${userId}`);
+            if (listRes.ok) {
+                const listData = await listRes.json();
+                renderRecentTable(listData);
+            }
+
+        } catch (err) {
+            console.error("Error fetching dashboard data:", err);
+        }
+    };
+
+    // --- File Complaint Popup ---
+    const fileComplaintPopup = () => {
+        const btn = document.getElementById("fileComplaintBtn");
+        const modal = document.getElementById("complaintBox"); 
+        const close = document.getElementById("closeModal"); 
+
+        btn.addEventListener("click", () => modal.classList.remove("hidden"));
+        close.addEventListener("click", () => modal.classList.add("hidden"));
+        window.addEventListener("click", (e) => {
+            if (e.target === modal) modal.classList.add("hidden");
+        });
+    };
+    fileComplaintPopup();
+
+    // --- My Complaints Logic ---
+    const myComplaintsPopup = () => {
+        const btn = document.getElementById("myComplaintsBtn"); 
+        const modal = document.getElementById("allComplaintBox"); 
+        const close = document.getElementById("closeAllComplaintsModal"); 
+
+        btn.addEventListener("click", async () => {
+            modal.classList.remove("hidden");
+            try {
+                const res = await fetch(`http://localhost:5000/api/all-complaints/${userId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    renderTable(data);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        close.addEventListener("click", () => modal.classList.add("hidden"));
+        window.addEventListener("click", (e) => {
+            if (e.target === modal) modal.classList.add("hidden");
+        });
+    };
+    myComplaintsPopup();
+
+    // --- Submit Form Logic ---
+    document.getElementById('complaintSubmit').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const data = {
+            title: document.getElementById('complaintTitle').value,
+            state: document.getElementById('state').value,
+            city: document.getElementById('city').value,
+            department: document.getElementById('department').value,
+            description: document.getElementById('description').value, 
+            issueLocation: document.getElementById('issueLocation').value
+        };
+        
+        try {
+            const response = await fetch(`http://localhost:5000/api/user-dashboard/${userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                alert('Complaint submitted!');
+                
+                count++; 
+                pending++;
+                document.getElementById("totalComplaints").innerText = count;
+                document.getElementById("totalPending").innerText = pending;
+
+                const listRes = await fetch(`http://localhost:5000/api/all-complaints/${userId}`);
+                const listData = await listRes.json();
+                renderRecentTable(listData);
+
+                document.getElementById('complaintSubmit').reset();
+                document.getElementById("complaintBox").classList.add("hidden");
+
+            } else {
+                const errData = await response.json();
+                alert('Error: ' + (errData.message || 'Failed to submit'));
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error connecting to server.');
         }
     });
 </script>

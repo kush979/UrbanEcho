@@ -7,7 +7,8 @@ const db = mysql.createPool({
     database: 'urbanEcho',
     waitForConnections: true,
     connectionLimit: 10, 
-    queueLimit: 0
+    queueLimit: 0,
+    multipleStatements: true
 });
 
 export { db };

@@ -67,6 +67,14 @@
             });
 
             const result = await response.json();
+            sessionStorage.setItem("user_Id", result.id);
+            console.log(result);
+            if (!result.id) {
+                alert("Unexpected response from server.");
+                return;
+            }else{
+                sessionStorage.setItem("user_Id", result.id);
+            }
 
             if (result.message === "Success") {
                 alert('Login successful!');
