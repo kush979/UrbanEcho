@@ -2,171 +2,243 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>UrbanEcho</title>
+    <title>UrbanEcho | Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#2563eb', // blue-600
-                        accent: '#fbbf24',  // amber-400
-                        bg: '#f0f9ff',      // sky-50
-                        card: '#ffffff',
-                        border: '#e0e7ef'
-                    }
-                }
-            }
+    <style>
+        .severity-high { background-color: #f87171; color: white; }
+        .severity-medium { background-color: #fbbf24; color: black; }
+        .severity-low { background-color: #60a5fa; color: white; }
+        /* Tab Active State */
+        .tab-active {
+            background-color: #2563eb; 
+            color: white;
+            border-color: #2563eb;
         }
-    </script>
+        .tab-inactive {
+            background-color: white;
+            color: #4b5563;
+            border-color: #e5e7eb;
+        }
+        .tab-inactive:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
 </head>
-<body class="bg-bg min-h-screen">
-    <!-- Navbar
-    <nav class="bg-card border-b border-border shadow-sm fixed w-full z-20 top-0 left-0">
-        <div class="max-w-6xl mx-auto px-4 flex items-center justify-between h-16">
-            <div class="flex items-center gap-2">
-                <div class="bg-primary rounded-full p-2">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-2.13a4 4 0 100-8 4 4 0 000 8zm6 6v1a2 2 0 01-2 2H7a2 2 0 01-2-2v-1"></path>
-                    </svg>
-                </div>
-                <span class="text-xl font-bold text-primary">UrbanEcho</span>
+
+<body class="bg-gray-50 min-h-screen font-sans">
+    <div class="relative z-10 pt-8 px-6 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-end mb-6">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-800">Admin Panel 🛠️</h1>
+                <p class="text-gray-500 mt-1">Manage issues by department.</p>
             </div>
-            <div class="flex space-x-6">
-                <a href="#features" class="text-primary hover:text-accent font-medium transition">Features</a>
-                <a href="src/pages/register.html" class="text-primary hover:text-accent font-medium transition">Register</a>
-                <a href="#contact" class="text-primary hover:text-accent font-medium transition">Contact</a>
+            <div class="flex items-center gap-4">
+                <button id="runSummarizerBtn" class="bg-purple-600 text-white py-2 px-4 rounded-lg shadow hover:bg-purple-700 transition font-medium flex items-center gap-2">
+                    <span>Run AI Summarizer</span> 🤖
+                </button>
+                <button id="refreshBtn" onclick="loadAdminData()" class="text-sm text-blue-600 hover:underline">
+                    Refresh Data ⟳
+                </button>
             </div>
         </div>
-    </nav>
 
-    <!-- Decorative background shapes -->
-    <div class="absolute inset-0 z-0 pointer-events-none">
-        <div class="absolute top-0 left-0 w-72 h-72 bg-primary opacity-10 rounded-full blur-2xl"></div>
-        <div class="absolute bottom-0 right-0 w-96 h-96 bg-accent opacity-20 rounded-full blur-3xl"></div>
+        <!-- Department Tabs -->
+        <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
+            <button onclick="switchTab('all')" id="tab-all" class="tab-active px-4 py-2 rounded-full border text-sm font-bold transition">All</button>
+            <button onclick="switchTab('road')" id="tab-road" class="tab-inactive px-4 py-2 rounded-full border text-sm font-bold transition">Road</button>
+            <button onclick="switchTab('light')" id="tab-light" class="tab-inactive px-4 py-2 rounded-full border text-sm font-bold transition">Lights</button>
+            <button onclick="switchTab('water')" id="tab-water" class="tab-inactive px-4 py-2 rounded-full border text-sm font-bold transition">Water</button>
+            <button onclick="switchTab('electricity')" id="tab-electricity" class="tab-inactive px-4 py-2 rounded-full border text-sm font-bold transition">Electricity</button>
+            <button onclick="switchTab('sanitation')" id="tab-sanitation" class="tab-inactive px-4 py-2 rounded-full border text-sm font-bold transition">Sanitation</button>
+            <button onclick="switchTab('traffic')" id="tab-traffic" class="tab-inactive px-4 py-2 rounded-full border text-sm font-bold transition">Traffic</button>
+            <button onclick="switchTab('drainage')" id="tab-drainage" class="tab-inactive px-4 py-2 rounded-full border text-sm font-bold transition">Drainage</button>
+            <button onclick="switchTab('garbage')" id="tab-garbage" class="tab-inactive px-4 py-2 rounded-full border text-sm font-bold transition">Garbage</button>
+            <button onclick="switchTab('others')" id="tab-others" class="tab-inactive px-4 py-2 rounded-full border text-sm font-bold transition">Others</button>
+        </div>
+        
+        <!-- Table Container -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-gray-700" id="tableTitle">All Complaints</h2>
+                <span class="text-xs font-mono bg-gray-200 text-gray-600 px-2 py-1 rounded" id="countBadge">0 items</span>
+            </div>
+
+            <table class="w-full text-sm text-left">
+                <thead class="bg-gray-100 text-gray-700">
+                    <tr>
+                        <th class="p-4">ID</th>
+                        <th class="p-4">Location</th>
+                        <th class="p-4">Title</th>
+                        <th class="p-4">Department</th> <!-- Added Dept Column -->
+                        <th class="p-4">Severity</th>
+                        <th class="p-4">Status</th>
+                        <th class="p-4 w-1/5">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="adminComplaintsBody">
+                    <!-- Rows injected via JS -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- Hero Section -->
-    <section class="relative z-10 flex items-center justify-center min-h-screen pt-24 pb-8">
-        <div class="bg-card rounded-2xl shadow-2xl p-10 w-full max-w-md border border-border flex flex-col items-center">
-            <div class="bg-primary rounded-full p-3 mb-3 shadow-lg">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-2.13a4 4 0 100-8 4 4 0 000 8zm6 6v1a2 2 0 01-2 2H7a2 2 0 01-2-2v-1"></path>
-                </svg>
-            </div>
-            <h1 class="text-4xl font-extrabold text-primary mb-2 tracking-tight text-center">Welcome to UrbanEcho</h1>
-            <p class="text-gray-500 text-center text-base mb-8">Your voice matters! Share your feedback and help us build a better city together.</p>
-            <a href="src/pages/register.html"
-               class="w-full py-3 px-4 bg-gradient-to-r from-primary to-accent text-white font-bold rounded-lg shadow-lg hover:from-blue-700 hover:to-yellow-400 transition text-lg text-center">
-                Get Started
-            </a>
-            <p class="text-xs text-gray-400 text-center mt-6">Your feedback is secure and confidential.</p>
-        </div>
-    </section>
+<script>
+    const API_BASE = 'http://localhost:5000/api/admin';
+    let allComplaintsData = []; // Global store for data
+    let currentTab = 'all';
 
-    <!-- Contact Section -->
-    <section id="contact" class="relative z-10 max-w-2xl mx-auto mb-16 bg-card rounded-xl shadow-lg border border-border p-8">
-        <h2 class="text-2xl font-bold text-primary mb-4 text-center">Contact Us</h2>
-        <p class="text-gray-500 text-center mb-6">Reach out to our team for any queries or collaborations!</p>
-        <div class="flex flex-col items-center space-y-4">
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 12v1a4 4 0 01-8 0v-1"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16v2m0 0h.01M12 18h.01"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.5a8.38 8.38 0 01-7.5 7.5A8.38 8.38 0 013 12.5C3 7.253 7.253 3 12.5 3S21 7.253 21 12.5z"></path>
-                </svg>
-                <span class="text-gray-700 font-medium">urbanecho.team@email.com</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm0 10a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2zm10-10a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zm0 10a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                </svg>
-                <span class="text-gray-700 font-medium">+91 98765 43210</span>
-            </div>
-            <div class="flex gap-4 mt-4 relative">
-                <!-- GitHub Button with Hover Popup -->
-                <div class="relative group">
-                    <a href="https://github.com/kush979/UrbanEcho" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg shadow hover:bg-blue-700 transition">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.93.58.11.79-.25.79-.56v-2.02c-3.2.7-3.87-1.54-3.87-1.54-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.78 2.73 1.27 3.4.97.11-.75.41-1.27.75-1.56-2.56-.29-5.26-1.28-5.26-5.7 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 012.9-.39c.98.01 1.97.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.43-2.7 5.41-5.27 5.7.42.36.8 1.09.8 2.2v3.26c0 .31.21.67.8.56C20.71 21.39 24 17.08 24 12c0-6.27-5.23-11.5-12-11.5z"/>
-                        </svg>
-                        GitHub
-                    </a>
-                    <!-- Popup -->
-                    <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:flex flex-col items-center bg-card border border-border rounded-lg shadow-lg p-2 z-30 w-36 bg-green-100">
-                        <div class="flex gap-2">
-                            <div class="flex flex-col items-center">
-                                <img src="https://avatars.githubusercontent.com/u/97912345?v=4" alt="User1" class="w-8 h-8 rounded-full border-2 border-primary shadow">
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <img src="https://avatars.githubusercontent.com/u/12345678?v=4" alt="User2" class="w-8 h-8 rounded-full border-2 border-accent shadow">
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <img src="https://avatars.githubusercontent.com/u/87654321?v=4" alt="User3" class="w-8 h-8 rounded-full border-2 border-primary shadow">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- LinkedIn Button with Hover Popup -->
-                <div class="relative group">
-                    <a href="https://linkedin.com/company/urbanecho" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg shadow hover:bg-yellow-500 transition">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.25c-.97 0-1.75-.78-1.75-1.75s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.75-1.75 1.75zm13.5 11.25h-3v-5.5c0-1.32-.03-3-1.83-3-1.83 0-2.11 1.43-2.11 2.91v5.59h-3v-10h2.88v1.36h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59v5.61z"/>
-                        </svg>
-                        LinkedIn
-                    </a>
-                    <!-- Popup -->
-                    <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:flex flex-col items-center bg-card border border-border rounded-lg shadow-lg p-2 z-30 w-36 bg-green-100">
-                        <div class="flex gap-2">
-                            <div class="flex flex-col items-center">
-                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User1" class="w-8 h-8 rounded-full border-2 border-primary shadow">
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="User2" class="w-8 h-8 rounded-full border-2 border-accent shadow">
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="User3" class="w-8 h-8 rounded-full border-2 border-primary shadow">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    const getStatusColor = (status) => {
+        const map = {
+            'Pending': 'text-yellow-600 bg-yellow-50',
+            'In Progress': 'text-blue-600 bg-blue-50',
+            'Resolved': 'text-green-600 bg-green-50',
+            'Rejected': 'text-red-600 bg-red-50'
+        };
+        return map[status] || 'text-gray-500';
+    };
 
-    <script src="../components/navbar.js"></script>
-    <script>
-        // Simple carousel logic
-        const carousel = document.getElementById('carousel');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        let currentSlide = 0;
-        const totalSlides = carousel.children.length;
+    // --- 1. SWITCH TAB LOGIC ---
+    window.switchTab = (category) => {
+        currentTab = category;
 
-        function showSlide(index) {
-            carousel.style.transform = `translateX(-${index * 100}%)`;
+        // Update UI Buttons
+        document.querySelectorAll('button[id^="tab-"]').forEach(btn => {
+            if(btn.id === `tab-${category}`) {
+                btn.classList.remove('tab-inactive');
+                btn.classList.add('tab-active');
+            } else {
+                btn.classList.remove('tab-active');
+                btn.classList.add('tab-inactive');
+            }
+        });
+
+        // Filter Data
+        const filtered = category === 'all' 
+            ? allComplaintsData 
+            : allComplaintsData.filter(item => item.department === category);
+
+        // Update Title
+        document.getElementById('tableTitle').innerText = category === 'all' ? "All Complaints" : `${category.charAt(0).toUpperCase() + category.slice(1)} Complaints`;
+        document.getElementById('countBadge').innerText = `${filtered.length} items`;
+
+        renderAdminTable(filtered);
+    };
+
+    // --- 2. RENDER TABLE ---
+    const renderAdminTable = (data) => {
+        const tableBody = document.getElementById("adminComplaintsBody");
+        tableBody.innerHTML = ""; 
+
+        if (data.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400 italic">No complaints found in this category.</td></tr>`;
+            return;
         }
 
-        prevBtn.addEventListener('click', () => {
-            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-            showSlide(currentSlide);
+        data.forEach(item => {
+            const statusClass = getStatusColor(item.current_status);
+            
+            // Safely handle null locations
+            const locDisplay = item.location ? item.location : "Unknown Loc";
+            
+            const row = `
+                <tr class="border-b hover:bg-gray-50 transition">
+                    <td class="p-4 font-mono text-xs text-gray-500">#${item.summary_id}</td>
+                    <td class="p-4 font-medium text-gray-600">${locDisplay}</td>
+                    <td class="p-4 font-bold text-gray-800">${item.summary_title}</td>
+                    <td class="p-4"><span class="text-xs uppercase tracking-wider font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">${item.department}</span></td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 text-xs font-semibold rounded ${'severity-' + item.severity.toLowerCase()}">
+                            ${item.severity}
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${statusClass}">${item.current_status}</span>
+                    </td>
+                    <td class="p-4">
+                        <select onchange="updateStatus(${item.summary_id}, '${item.department}', this.value)" 
+                                class="border border-gray-300 p-1.5 rounded text-sm bg-white hover:border-blue-500 focus:ring-2 focus:ring-blue-200 cursor-pointer outline-none transition">
+                            <option value="" disabled selected>Update</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
         });
+    };
 
-        nextBtn.addEventListener('click', () => {
-            currentSlide = (currentSlide + 1) % totalSlides;
-            showSlide(currentSlide);
-        });
+    // --- 3. UPDATE STATUS (API) ---
+    window.updateStatus = async (id, department, newStatus) => {
+        if (!confirm(`Update #${id} (${department}) to "${newStatus}"?`)) return;
 
-        showSlide(currentSlide);
+        try {
+            const response = await fetch(`${API_BASE}/status/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newStatus, department })
+            });
 
-        // Contact form (demo only)
-        document.querySelector('#contact form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Thank you for contacting UrbanEcho!');
-            this.reset();
-        });
-    </script>
+            if (response.ok) {
+                // Optimistic UI Update (Update local data without re-fetching)
+                const index = allComplaintsData.findIndex(d => d.summary_id === id && d.department === department);
+                if(index !== -1) {
+                    allComplaintsData[index].current_status = newStatus;
+                    switchTab(currentTab); // Re-render current tab
+                }
+            } else {
+                alert('Update failed.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Server Error');
+        }
+    };
+
+    // --- 4. AI SUMMARIZER LOGIC ---
+    document.getElementById('runSummarizerBtn').addEventListener('click', async () => {
+        if (!confirm("This will fetch all unresolved user complaints and run the AI grouping/summarization process. Continue?")) {
+            return;
+        }
+        
+        const btn = document.getElementById('runSummarizerBtn');
+        const originalText = btn.innerHTML; // Save the icon
+        btn.innerText = "Processing...";
+        btn.disabled = true;
+        btn.classList.add("opacity-50", "cursor-not-allowed");
+
+        try {
+            const response = await fetch(`${API_BASE}/summarize`, { method: 'POST' });
+            const result = await response.json();
+            alert(result.message);
+            loadAdminData(); // Reload table to see changes
+        } catch (error) {
+            console.error(error);
+            alert("Error running AI service. Check if backend/Python script is running.");
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+    });
+    
+    // --- 5. INITIAL LOAD ---
+    window.loadAdminData = async () => {
+        try {
+            const response = await fetch(`${API_BASE}/dashboard`);
+            if (!response.ok) throw new Error("Failed");
+            allComplaintsData = await response.json();
+            switchTab(currentTab); // Reload current view
+        } catch (error) {
+            document.getElementById("adminComplaintsBody").innerHTML = `<tr><td colspan="7" class="p-4 text-center text-red-500">Error loading dashboard data. Ensure backend is running.</td></tr>`;
+        }
+    };
+    
+    window.onload = loadAdminData;
+</script>
 </body>
 </html>

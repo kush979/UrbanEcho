@@ -45,7 +45,6 @@ function createNavbar() {
         { href: '/client/src/pages/login.html', text: 'Login' },
         { href: '#contact', text: 'Contact' }
     ];
-
     
     let currentPage = window.location.pathname;
     const commonUpdater = () => {
@@ -54,6 +53,22 @@ function createNavbar() {
         brandName.className = 'text-primary hover:text-accent font-medium transition flex items-center gap-2';
 }
     
+// const navbarMap = {
+//     'register.html': [
+//         { href: '/client/src/pages/login.html', text: 'Login' },
+//     ],
+//     'login.html': [
+//         { href: '/client/src/pages/register.html', text: 'Register' },
+//     ],
+//     'dashboard.html': [
+//         { href: '/client/src/pages/login.html', text: 'Logout' },
+//     ],
+//     'admin.html': [
+//         { href: '/client/src/pages/login.html', text: 'Logout' },
+//     ],
+// }
+
+    // const renderedLinks = navbarMap[currentPage.split('/').pop()];
     if (currentPage.includes('register.html')) {
         commonUpdater();
         links = [
@@ -66,6 +81,9 @@ function createNavbar() {
         ];
     } else if(currentPage.includes('dashboard.html') || currentPage.includes('admin.html')) {
         commonUpdater();
+        links = [
+            { href: '/client/src/pages/login.html', text: 'Logout' }
+        ];
     }
     
     links.forEach(linkInfo => {

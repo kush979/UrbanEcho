@@ -117,8 +117,18 @@
                         <input type="text" id="city" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter city">
                     </div>
                     <div class="col-span-2">
-                        <label class="block mb-2 font-medium">Department</label>
-                        <input type="text" id="department" class="w-full border px-3 py-2 rounded mb-3" placeholder="Enter complaint department">
+                        <label class="block mb-2 font-medium text-gray-700">Category</label>
+                        <select id="department" class="w-full border border-gray-300 px-3 py-2 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm transition-all duration-200 mb-3">
+                            <option value="" disabled selected>Select an issue category</option>
+                            <option value="road">Road</option>
+                            <option value="street_light">Street Light</option>
+                            <option value="sanitation">Sanitation</option>
+                            <option value="water_supply">Water Supply</option>
+                            <option value="traffic">Traffic</option>
+                            <option value="drainage">Drainage & Sewage</option>
+                            <option value="garbage">Garbage Collection</option>
+                            <option value="electricity">Electricity</option>
+                        </select>
                     </div>
                     <div class="col-span-2">    
                         <label class="block mb-2 font-medium">Description</label>
@@ -306,6 +316,7 @@
             description: document.getElementById('description').value, 
             issueLocation: document.getElementById('issueLocation').value
         };
+        console.log(data);
         
         try {
             const response = await fetch(`http://localhost:5000/api/user-dashboard/${userId}`, {

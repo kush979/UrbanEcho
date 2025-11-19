@@ -1,15 +1,45 @@
 import { db } from '../../mysql/dbconnect.js';
 
-// POST: put a complaint
 export const PutComplaint = async (req, res) => {
   try {
     const userId = parseInt(req.params.userId, 10);
-    const { title, state, city, department, description, issueLocation } = req.body;
+    const { city, department, description, issueLocation, title, state } = req.body;
+
+    console.log("1. Received Department:", `"${department}"`); 
+
     const [result] = await db.execute(
       'INSERT INTO complaints (user_id, title, state, city, department, description, issue_location, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
       [userId, title, state, city, department, description, issueLocation]
     );
-    res.status(201).json({ complaint_id: result.insertId, user_id: userId, title, state, city, department, description, issueLocation, created_at: new Date() });
+
+    console.log("2. Main Complaint Inserted ID:", result.insertId);
+
+    const deptQuery = `
+      INSERT INTO \`${department}\` 
+      (user_id, title, state, city, description, issue_location, created_at) 
+      VALUES (?, ?, ?, ?, ?, ?, NOW())
+    `;
+
+    console.log("3. Executing Dept Query:", deptQuery);
+
+    await db.execute(deptQuery, [
+      userId, title, state, city, description, issueLocation
+    ]);
+
+    console.log("4. Department Insert Success");
+
+    res.status(201).json({ 
+        complaint_id: result.insertId, 
+        user_id: userId, 
+        title, 
+        state, 
+        city, 
+        department, 
+        description, 
+        issueLocation, 
+        created_at: new Date() 
+    });
+
   } catch (error) {
     console.error('COMPLAINT ERROR:', error);
     res.status(400).json({ message: error.message });

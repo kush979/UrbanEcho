@@ -67,23 +67,23 @@
             });
 
             const result = await response.json();
-            sessionStorage.setItem("user_Id", result.id);
+            // sessionStorage.setItem("user_Id", result.id);
             console.log(result);
-            if (!result.id) {
-                alert("Unexpected response from server.");
-                return;
-            }else{
-                sessionStorage.setItem("user_Id", result.id);
-            }
 
-            if (result.message === "Success") {
-                alert('Login successful!');
-                document.getElementById('loginForm').reset();
-                window.location.href = './user-dashboard.html';
-            } else if (result.message === "Admin") {
+            if (result.message === "Admin") {
                 alert('Admin login successful!');
                 document.getElementById('loginForm').reset();
                 window.location.href = './admin-dashboard.html';
+            } else if (result.message === "Success") {
+                alert('Login successful!');
+                if (!result.id) {
+                    alert("Unexpected response from server.");
+                    return;
+                }else{
+                    sessionStorage.setItem("user_Id", result.id);
+                }
+                document.getElementById('loginForm').reset();
+                window.location.href = './user-dashboard.html';
             } else if (result.message === "Failure") {
                 alert('Login failed. Please try again.');
             }
