@@ -1,5 +1,6 @@
 CREATE DATABASE urbanecho;
 show databases;
+show tables;
 use urbanecho;
 CREATE TABLE users (
     id INT AUTO_INCREMENT,
@@ -40,5 +41,104 @@ ALTER TABLE complaints CHANGE id user_id INT;
 SHOW CREATE TABLE complaints;
 ALTER TABLE complaints DROP FOREIGN KEY id;
 ALTER TABLE complaints MODIFY COLUMN created_at TIMESTAMP AFTER issue_location;
+ALTER TABLE complaints MODIFY COLUMN department VARCHAR(100) AFTER city;
 TRUNCATE TABLE complaints;
 ALTER TABLE complaints MODIFY COLUMN status ENUM('Pending', 'Resolved', 'Rejected', 'In-Progress') DEFAULT 'Pending';
+CREATE TABLE road (
+    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    title VARCHAR(255),
+    state VARCHAR(100),
+    city VARCHAR(100),
+    description TEXT,
+    status ENUM('Pending', 'Resolved', 'Rejected', 'In-Progress') DEFAULT 'Pending',
+    issue_location VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE street_light (
+    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    title VARCHAR(255),
+    state VARCHAR(100),
+    city VARCHAR(100),
+    description TEXT,
+    status ENUM('Pending', 'Resolved', 'Rejected', 'In-Progress') DEFAULT 'Pending',
+    issue_location VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE sanitation (
+    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    title VARCHAR(255),
+    state VARCHAR(100),
+    city VARCHAR(100),
+    description TEXT,
+    status ENUM('Pending', 'Resolved', 'Rejected', 'In-Progress') DEFAULT 'Pending',
+    issue_location VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE water_supply (
+    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    title VARCHAR(255),
+    state VARCHAR(100),
+    city VARCHAR(100),
+    description TEXT,
+    status ENUM('Pending', 'Resolved', 'Rejected', 'In-Progress') DEFAULT 'Pending',
+    issue_location VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE traffic (
+    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    title VARCHAR(255),
+    state VARCHAR(100),
+    city VARCHAR(100),
+    description TEXT,
+    status ENUM('Pending', 'Resolved', 'Rejected', 'In-Progress') DEFAULT 'Pending',
+    issue_location VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE drainage (
+    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    title VARCHAR(255),
+    state VARCHAR(100),
+    city VARCHAR(100),
+    description TEXT,
+    status ENUM('Pending', 'Resolved', 'Rejected', 'In-Progress') DEFAULT 'Pending',
+    issue_location VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE garbage (
+    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    title VARCHAR(255),
+    state VARCHAR(100),
+    city VARCHAR(100),
+    description TEXT,
+    status ENUM('Pending', 'Resolved', 'Rejected', 'In-Progress') DEFAULT 'Pending',
+    issue_location VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE electricity (
+    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    title VARCHAR(255),
+    state VARCHAR(100),
+    city VARCHAR(100),
+    description TEXT,
+    status ENUM('Pending', 'Resolved', 'Rejected', 'In-Progress') DEFAULT 'Pending',
+    issue_location VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+SELECT * FROM sanitation;

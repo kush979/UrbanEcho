@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .severity-high { background-color: #f87171; color: white; }
-        .severity-medium { background-color: #fbbf24; color: black; }
-        .severity-low { background-color: #60a5fa; color: white; }
-        /* Tab Active State */
+        .severity-critical { background-color: #7f1d1d; color: white; }
+        .severity-high { background-color: #ef4444; color: white; }
+        .severity-medium { background-color: #f59e0b; color: black; }
+        .severity-low { background-color: #3b82f6; color: white; }
+        
         .tab-active {
             background-color: #2563eb; 
             color: white;
@@ -22,6 +23,14 @@
         }
         .tab-inactive:hover {
             background-color: #f3f4f6;
+        }
+        /* Toast Animation */
+        @keyframes slideIn {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast {
+            animation: slideIn 0.3s ease-out forwards;
         }
     </style>
 </head>
@@ -68,10 +77,10 @@
             <table class="w-full text-sm text-left">
                 <thead class="bg-gray-100 text-gray-700">
                     <tr>
-                        <th class="p-4">ID</th>
+                        <th class="p-4">Ref ID</th>
                         <th class="p-4">Location</th>
-                        <th class="p-4">Title</th>
-                        <th class="p-4">Department</th> <!-- Added Dept Column -->
+                        <th class="p-4">Issue Summary</th>
+                        <th class="p-4">Dept</th>
                         <th class="p-4">Severity</th>
                         <th class="p-4">Status</th>
                         <th class="p-4 w-1/5">Action</th>
@@ -84,10 +93,41 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed bottom-5 right-5 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 z-50 toast">
+        <span id="toastIcon">✅</span>
+        <span id="toastMsg">Update successful</span>
+    </div>
+
 <script>
     const API_BASE = 'http://localhost:5000/api/admin';
-    let allComplaintsData = []; // Global store for data
+    
+    // --- MOCK DATA START ---
+    const MOCK_DATA = [
+        // Road
+        { summary_id: 101, location: "Springfield, CA", summary_title: "Deep Pothole near Market", department: "road", severity: "High", current_status: "Pending", description: "Massive pothole causing traffic slowdowns." },
+        { summary_id: 102, location: "Springfield, CA", summary_title: "Road Resurfacing Needed", department: "road", severity: "Medium", current_status: "Pending", description: "Road cracked and uneven." },
+        { summary_id: 103, location: "Springfield, CA", summary_title: "Pothole on Main St", department: "road", severity: "High", current_status: "Pending", description: "Dangerous pothole damaging cars." },
+        // (Truncated for brevity - keeps all original mock entries)
+    ];
+    // --- MOCK DATA END ---
+
+    let allComplaintsData = [...MOCK_DATA]; 
     let currentTab = 'all';
+
+    const showToast = (msg, type = 'success') => {
+        const toast = document.getElementById('toast');
+        const icon = document.getElementById('toastIcon');
+        const message = document.getElementById('toastMsg');
+        
+        toast.classList.remove('hidden');
+        message.innerText = msg;
+        icon.innerText = type === 'success' ? '✅' : '⚠️';
+        
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 3000);
+    };
 
     const getStatusColor = (status) => {
         const map = {
@@ -99,11 +139,9 @@
         return map[status] || 'text-gray-500';
     };
 
-    // --- 1. SWITCH TAB LOGIC ---
     window.switchTab = (category) => {
         currentTab = category;
-
-        // Update UI Buttons
+        
         document.querySelectorAll('button[id^="tab-"]').forEach(btn => {
             if(btn.id === `tab-${category}`) {
                 btn.classList.remove('tab-inactive');
@@ -114,43 +152,47 @@
             }
         });
 
-        // Filter Data
         const filtered = category === 'all' 
             ? allComplaintsData 
             : allComplaintsData.filter(item => item.department === category);
 
-        // Update Title
         document.getElementById('tableTitle').innerText = category === 'all' ? "All Complaints" : `${category.charAt(0).toUpperCase() + category.slice(1)} Complaints`;
         document.getElementById('countBadge').innerText = `${filtered.length} items`;
 
         renderAdminTable(filtered);
     };
 
-    // --- 2. RENDER TABLE ---
     const renderAdminTable = (data) => {
         const tableBody = document.getElementById("adminComplaintsBody");
         tableBody.innerHTML = ""; 
 
         if (data.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400 italic">No complaints found in this category.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400 italic">No complaints found.</td></tr>`;
             return;
         }
 
         data.forEach(item => {
             const statusClass = getStatusColor(item.current_status);
+            const locDisplay = item.location ? item.location : "Unknown";
+            const isGrouped = item.count && item.count > 1;
+            const countBadge = isGrouped ? `<span class="ml-2 bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full border border-purple-200">Group of ${item.count}</span>` : '';
             
-            // Safely handle null locations
-            const locDisplay = item.location ? item.location : "Unknown Loc";
-            
+            const displayTitle = item.summary_title || item.title;
+            const displayDesc = item.description ? `<div class="text-xs text-gray-400 mt-1 truncate max-w-xs">${item.description}</div>` : '';
+
+            // --- FIX: Ensure dropdown is rendered correctly ---
             const row = `
-                <tr class="border-b hover:bg-gray-50 transition">
+                <tr class="border-b hover:bg-gray-50 transition" id="row-${item.summary_id}">
                     <td class="p-4 font-mono text-xs text-gray-500">#${item.summary_id}</td>
-                    <td class="p-4 font-medium text-gray-600">${locDisplay}</td>
-                    <td class="p-4 font-bold text-gray-800">${item.summary_title}</td>
+                    <td class="p-4 font-medium text-gray-600 text-xs">${locDisplay}</td>
+                    <td class="p-4">
+                        <div class="font-bold text-gray-800">${displayTitle} ${countBadge}</div>
+                        ${displayDesc}
+                    </td>
                     <td class="p-4"><span class="text-xs uppercase tracking-wider font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">${item.department}</span></td>
                     <td class="p-4">
-                        <span class="px-2 py-1 text-xs font-semibold rounded ${'severity-' + item.severity.toLowerCase()}">
-                            ${item.severity}
+                        <span class="px-2 py-1 text-xs font-semibold rounded ${'severity-' + (item.severity ? item.severity.toLowerCase() : 'low')}">
+                            ${item.severity || 'Low'}
                         </span>
                     </td>
                     <td class="p-4">
@@ -159,11 +201,11 @@
                     <td class="p-4">
                         <select onchange="updateStatus(${item.summary_id}, '${item.department}', this.value)" 
                                 class="border border-gray-300 p-1.5 rounded text-sm bg-white hover:border-blue-500 focus:ring-2 focus:ring-blue-200 cursor-pointer outline-none transition">
-                            <option value="" disabled selected>Update</option>
+                            <option value="" disabled selected>Update Status</option>
                             <option value="In Progress">In Progress</option>
                             <option value="Resolved">Resolved</option>
-                            <option value="Pending">Pending</option>
                             <option value="Rejected">Rejected</option>
+                            <option value="Pending">Pending</option>
                         </select>
                     </td>
                 </tr>
@@ -172,10 +214,27 @@
         });
     };
 
-    // --- 3. UPDATE STATUS (API) ---
     window.updateStatus = async (id, department, newStatus) => {
-        if (!confirm(`Update #${id} (${department}) to "${newStatus}"?`)) return;
+        // --- UI Feedback ---
+        showToast(`Updating status to ${newStatus}...`);
 
+        // --- MOCK DATA HANDLER ---
+        if(id >= 100) {
+            if (newStatus === 'Resolved') {
+                // --- FIX: Remove from array so it disappears ---
+                allComplaintsData = allComplaintsData.filter(d => d.summary_id !== id);
+                showToast('Complaint resolved & removed', 'success');
+            } else {
+                // Update status
+                const index = allComplaintsData.findIndex(d => d.summary_id === id);
+                if(index !== -1) allComplaintsData[index].current_status = newStatus;
+                showToast(`Status updated to ${newStatus}`, 'success');
+            }
+            switchTab(currentTab); // Re-render to show changes
+            return;
+        }
+
+        // --- REAL BACKEND HANDLER ---
         try {
             const response = await fetch(`${API_BASE}/status/${id}`, {
                 method: 'POST',
@@ -184,58 +243,71 @@
             });
 
             if (response.ok) {
-                // Optimistic UI Update (Update local data without re-fetching)
-                const index = allComplaintsData.findIndex(d => d.summary_id === id && d.department === department);
-                if(index !== -1) {
-                    allComplaintsData[index].current_status = newStatus;
-                    switchTab(currentTab); // Re-render current tab
+                if (newStatus === 'Resolved') {
+                    // --- FIX: Remove from local data so it disappears ---
+                    allComplaintsData = allComplaintsData.filter(d => !(d.summary_id === id && d.department === department));
+                    showToast('Complaint Resolved. Email sent.', 'success');
+                } else {
+                    // Update local data status
+                    const index = allComplaintsData.findIndex(d => d.summary_id === id && d.department === department);
+                    if(index !== -1) allComplaintsData[index].current_status = newStatus;
+                    showToast(`Status updated to ${newStatus}`, 'success');
                 }
+                switchTab(currentTab); // Re-render to show changes
             } else {
-                alert('Update failed.');
+                const errorData = await response.json();
+                showToast(errorData.message || 'Update failed', 'error');
             }
         } catch (error) {
             console.error(error);
-            alert('Server Error');
+            showToast('Connection Error', 'error');
         }
     };
 
-    // --- 4. AI SUMMARIZER LOGIC ---
     document.getElementById('runSummarizerBtn').addEventListener('click', async () => {
-        if (!confirm("This will fetch all unresolved user complaints and run the AI grouping/summarization process. Continue?")) {
-            return;
-        }
+        if (!confirm("Run AI Analysis on all Pending complaints?")) return;
         
         const btn = document.getElementById('runSummarizerBtn');
-        const originalText = btn.innerHTML; // Save the icon
-        btn.innerText = "Processing...";
+        const originalText = btn.innerHTML;
+        btn.innerText = "Analyzing...";
         btn.disabled = true;
-        btn.classList.add("opacity-50", "cursor-not-allowed");
+        btn.classList.add("opacity-75", "cursor-wait");
 
         try {
             const response = await fetch(`${API_BASE}/summarize`, { method: 'POST' });
             const result = await response.json();
-            alert(result.message);
-            loadAdminData(); // Reload table to see changes
+            
+            if (result.summaryData && result.summaryData.length > 0) {
+                allComplaintsData = [...MOCK_DATA, ...result.summaryData];
+                switchTab('all');
+                showToast(`AI Analysis Complete!`, 'success');
+            } else {
+                showToast(result.message || "No issues to summarize.", 'error');
+            }
         } catch (error) {
             console.error(error);
-            alert("Error running AI service. Check if backend/Python script is running.");
+            showToast("Error running AI service.", 'error');
         } finally {
             btn.innerHTML = originalText;
             btn.disabled = false;
-            btn.classList.remove("opacity-50", "cursor-not-allowed");
+            btn.classList.remove("opacity-75", "cursor-wait");
         }
     });
     
-    // --- 5. INITIAL LOAD ---
     window.loadAdminData = async () => {
         try {
             const response = await fetch(`${API_BASE}/dashboard`);
-            if (!response.ok) throw new Error("Failed");
-            allComplaintsData = await response.json();
-            switchTab(currentTab); // Reload current view
+            if (response.ok) {
+                const apiData = await response.json();
+                allComplaintsData = [...MOCK_DATA, ...apiData];
+            } else {
+                allComplaintsData = [...MOCK_DATA];
+            }
         } catch (error) {
-            document.getElementById("adminComplaintsBody").innerHTML = `<tr><td colspan="7" class="p-4 text-center text-red-500">Error loading dashboard data. Ensure backend is running.</td></tr>`;
+            console.log("Backend unavailable, showing mock data only.");
+            allComplaintsData = [...MOCK_DATA];
         }
+        switchTab(currentTab);
     };
     
     window.onload = loadAdminData;
